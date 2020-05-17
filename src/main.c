@@ -7,6 +7,7 @@ To build: gcc src/*.c src/telecommand/*.c -c -I include/telecommand/ -I ../ex2_o
 #include <task.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -32,34 +33,27 @@ unsigned long ulLine, const char * const pcFileName
 }
 
 int main(int argc, char **argv) {
-    fifo_data *data = pvPortMalloc(sizeof(fifo_data));
-
     if (!start_telecommand_handler()) {
       printf("COULD NOT START TELECOMMAND HANDLER");
       return -1;
     }
+    char *tx_channel_name, *rx_channel_name;
 
     /* Run as either server or client */
-    if (argc != 2) {
-        printf("usage: %s <server/client>\r\n", argv[0]);
+    if (argc != 3) {
+        printf("usage: %s <server/client> <id>\r\n", argv[0]);
         return -1;
     }
 
     /* Set type */
     if (strcmp(argv[1], "server") == 0) {
-        data->me = 1;
-        data->other = 2;
-        data->tx_channel_name = "server_to_client";
-        data->rx_channel_name = "client_to_server";
-        data->type = TYPE_SERVER;
+        tx_channel_name = "server_to_client";
+        rx_channel_name = "client_to_server";
 				xTaskCreate( (TaskFunction_t) server_loop, "SERVER THREAD", 2048, NULL, 1, &server_loop_thread);
     } else if (strcmp(argv[1], "client") == 0) {
-        data->me = 2;
-        data->other = 1;
-        data->tx_channel_name = "client_to_server";
-        data->rx_channel_name = "server_to_client";
-        data->type = TYPE_CLIENT;
-				xTaskCreate( (TaskFunction_t) client_loop, "CLIENT THREAD", 2048, (void *) data, 1, &client_loop_thread);
+      tx_channel_name = "client_to_server";
+      rx_channel_name = "server_to_client";
+				xTaskCreate( (TaskFunction_t) client_loop, "CLIENT THREAD", 2048, NULL, 1, &client_loop_thread);
     } else {
         printf("Invalid type. Must be either 'server' or 'client'\r\n");
         return -1;
@@ -67,18 +61,19 @@ int main(int argc, char **argv) {
     }
 
     /* Init CSP and CSP buffer system */
-    if (csp_init(data->me) != CSP_ERR_NONE || csp_buffer_init(64, 512) != CSP_ERR_NONE) {
+    printf("starting on %d\n",(uint8_t) atoi(argv[2]));
+    if (csp_init((uint8_t) atoi(argv[2])) != CSP_ERR_NONE || csp_buffer_init(64, 512) != CSP_ERR_NONE) {
         printf("Failed to init CSP\r\n");
         return -1;
     }
 
-		tx_channel = open(data->tx_channel_name, O_RDWR);
+		tx_channel = open(tx_channel_name, O_RDWR);
 		if (tx_channel < 0) {
 				printf("Failed to open TX channel\r\n");
 				return -1;
 		}
 
-		rx_channel = open(data->rx_channel_name, O_RDWR);
+		rx_channel = open(rx_channel_name, O_RDWR);
 		if (rx_channel < 0) {
 				printf("Failed to open RX channel\r\n");
 				return -1;

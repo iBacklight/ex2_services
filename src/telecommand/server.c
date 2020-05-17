@@ -101,6 +101,7 @@ void server_loop(void * parameters) {
         while ((packet = csp_read(conn, 50)) != NULL) {
             switch (csp_conn_dport(conn)) {
                 case TELECOMMAND_PORT:
+                  printf("HERERERE\n");
                   strcpy(incoming_telecommand.data, packet->data);
                   incoming_telecommand.id = telecommandId++;
                   // Send event to telecommand handler
