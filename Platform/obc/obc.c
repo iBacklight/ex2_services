@@ -17,9 +17,8 @@
  * @date 2020-06-06
  */
 
-#include "demo.h"
-
 #include <FreeRTOS.h>
+#include <obc/obc.h>
 #include <stdio.h>
 
 #include "housekeeping_service.h"
@@ -101,15 +100,15 @@ SAT_returnState start_service_handlers() {
   };
 
   if (xTaskCreate((TaskFunction_t)housekeeping_app_route,
-                  "housekeeping_app_route", 300, NULL, NORMAL_SERVICE_PRIO,
-                  NULL) != pdPASS) {
+                    "housekeeping_app_route", 500, NULL, NORMAL_SERVICE_PRIO,
+                    NULL) != pdPASS) {
     ex2_log("FAILED TO CREATE TASK housekeeping_app_route\n");
     return SATR_ERROR;
   };
 
   if (xTaskCreate((TaskFunction_t)time_management_app_route,
-                  "time_management_app_route", 300, NULL, NORMAL_SERVICE_PRIO,
-                  NULL) != pdPASS) {
+                    "time_management_app_route", 500, NULL, NORMAL_SERVICE_PRIO,
+                    NULL) != pdPASS) {
     ex2_log("FAILED TO CREATE TASK time_management_app_route\n");
     return SATR_ERROR;
   }

@@ -11,24 +11,25 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+/**
+ * @file demo_hal.c
+ * @author Andrew Rooney
+ * @date 2020-06-06
+ */
 
-#ifndef TIME_MANAGEMENT_H
-#define TIME_MANAGEMENT_H
+#include <obc/hal/obc_hal.h>
+#include "hal.h"
 
-#include <csp/csp.h>
-#include <stdint.h>
+uint32_t current_time;
 
-#include "services.h"
+/**
+ * These functions are WIP stubs to a non-existent RTC
+ */
 
-#define MIN_YEAR 1577836800  // 2020-01-01
-#define MAX_YEAR 1893456000  // 2030-01-01
+void HAL_sys_setTime(uint32_t unix_timestamp) {
+  HAL_RTC_SetTime(unix_timestamp);
+}
 
-#define TIMESTAMP_ISOK(x) (x > MIN_YEAR && x < MAX_YEAR) ? 1 : 0
-
-struct time_utc {
-  uint32_t unix_timestamp;
-};
-
-SAT_returnState time_management_app(csp_packet_t *pck);
-
-#endif /* TIME_MANAGEMENT_H */
+void HAL_sys_getTime(uint32_t *unix_timestamp) {
+  HAL_RTC_GetTime(unix_timestamp);
+}
